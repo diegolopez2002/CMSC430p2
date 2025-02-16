@@ -5,21 +5,32 @@
   (require rackunit)
   (require a86/interp))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Some problems using bitwise operations
+
+;; Define a sequence of assembly instructions that zeroes out the least
+;; significant 4 bits of the rax register.
+
 (define zero-lower-4-rax
   (seq
-    (Instr 'and 'rax #xFFFFFFFFFFFFFFF0)))
+    (Instr 'and 'rax #xFFFFFFFFFFFFFFF0))) ; Mask to clear the lower 4 bits
+
+;; Define a sequence of assembly instructions that checks if the least
+;; significant 4 bits of rax are equal to 5, and if so, sets rcx to 1,
+;; otherwise sets rcx to 0.
 
 (define check-lower-4-rax
   (seq
-    (push rax)
-    (and rax #xF)
-    (mov rcx 0)
-    (cmp rax 5)
-    (mov rax 1)
-    (cmove rcx rax)
-    (pop rax)))
+    (Push 'rax)                     ; Save rax on the stack
+    (And 'rax #xF)                  ; Mask rax to get only the lower 4 bits
+    (Mov 'rcx 0)                    ; Default rcx to 0
+    (Cmp 'rax 5)                    ; Compare lower 4 bits with 5
+    (Mov 'rax 1)                    ; Set rax to 1
+    (Cmove 'rcx 'rax)               ; If equal, move rax to rcx (set rcx to 1)
+    (Pop 'rax)))                    ; Restore rax
 
 (module+ test
+  ;; Int64 -> Int64
   (define (t1 n)
     (asm-interp
      (prog (Global 'entry)
@@ -55,3 +66,4 @@
   (check-true (t2 5))
   (check-true (t2 15))
   (check-true (t2 16)))
+
