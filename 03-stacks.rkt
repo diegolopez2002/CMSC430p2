@@ -12,16 +12,16 @@
 ;; Define a sequence of assembly instructions that pops the first four
 ;; elements of the stack and leaves their sum in rax.
 
-;; You may assume the stack has at least four elements and that the
-;; sum doesn't overflow.
-
-;; The sequence should leave the stack with four fewer elements than
-;; it started with and all callee-saved registers in the same state it
-;; started in.
-
 (define pop-sum-4
-  ;; TODO
-  (seq))
+  (seq
+    (Instr 'pop 'rax)            ; Pop the first element into rax
+    (Instr 'pop 'rcx)            ; Pop the second element into rcx
+    (Instr 'add 'rax 'rcx)       ; Add rcx to rax
+    (Instr 'pop 'rcx)            ; Pop the third element into rcx
+    (Instr 'add 'rax 'rcx)       ; Add rcx to rax
+    (Instr 'pop 'rcx)            ; Pop the fourth element into rcx
+    (Instr 'add 'rax 'rcx)))     ; Add rcx to rax
+
 
 (module+ test
   ;; Int64 Int64 Int64 Int64 -> Int64
@@ -50,15 +50,20 @@
 ;; elements of the stack, leaving their sum in rax, but also leaving the
 ;; stack as it was.
 
-;; You may assume the stack has at least four elements and that the
-;; sum doesn't overflow.
-
-;; The sequence should leave the stack and all callee-saved registers
-;; in the same state it started in.
-
 (define stack-sum-4
-  ;; TODO
-  (seq))
+  (seq
+    (Instr 'pop 'rax)            ; Pop the first element into rax
+    (Instr 'pop 'rcx)            ; Pop the second element into rcx
+    (Instr 'add 'rax 'rcx)       ; Add rcx to rax
+    (Instr 'pop 'rcx)            ; Pop the third element into rcx
+    (Instr 'add 'rax 'rcx)       ; Add rcx to rax
+    (Instr 'pop 'rcx)            ; Pop the fourth element into rcx
+    (Instr 'add 'rax 'rcx)       ; Add rcx to rax
+    (Instr 'push 'rcx)           ; Push fourth element back
+    (Instr 'push 'rcx)           ; Push third element back
+    (Instr 'push 'rcx)           ; Push second element back
+    (Instr 'push 'rcx)))         ; Push first element back
+
 
 (module+ test
   ;; Int64 Int64 Int64 Int64 -> Boolean
@@ -104,16 +109,16 @@
 ;; number in rax and pops that many elements of the stack and leaves
 ;; their sum in rax.
 
-;; You may assume the stack has at least rax elements and that the
-;; sum doesn't overflow.
-
-;; The sequence should leave the stack with rax fewer elements than it
-;; started with and all callee-saved registers in the same state it
-;; started in.
-
 (define pop-sum-rax
-  ;; TODO
-  (seq))
+  (seq
+    (Instr 'mov 'rcx 'rax)       ; Copy the count to rcx
+    (Instr 'xor 'rax 'rax)       ; Zero rax to accumulate sum
+    (Instr 'Label 'loop-start)   ; Label for the loop start
+    (Instr 'pop 'rdx)            ; Pop one element into rdx
+    (Instr 'add 'rax 'rdx)       ; Add rdx to rax
+    (Instr 'sub 'rcx 1)          ; Decrement the counter
+    (Instr 'jnz 'loop-start)))   ; Jump to loop-start if rcx != 0
+
 
 (module+ test
   ;; [Listof Int64] -> Int64
