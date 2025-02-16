@@ -9,19 +9,15 @@
 ;; Some functions in assembly
 
 
-;; Define a an assembly function named mult3, i.e. a sequence that
-;; starts with the label mult3 and and ends with a return that leaves
-;; the stack and all callee-saved registers in the same state it
-;; started in, that is given a number n in rax and returns
-;; with with n*3 in rax.
-
-;; You may assume the result doesn't overflow.
+;; Define an assembly function named mult3 that multiplies n by 3
 
 (define mult3
-  ;; TODO
   (seq
    (Label 'mult3)
-   (Ret)))
+   (Mov 'rcx 3)          ; Load 3 into rcx
+   (Imul 'rax 'rcx)      ; Multiply rax by rcx (n * 3)
+   (Ret)))               ; Return
+
 
 (module+ test
   ;; Int64 -> Int64
@@ -45,21 +41,43 @@
   (check-equal? (m3 19) (* 19 3)))
 
 
-;; Define a an assembly function named fib, i.e. a sequence that
-;; starts with the label fib and and ends with a return that leaves
-;; the stack and all callee-saved registers in the same state it
-;; started in, that is given a natural number n in rax and returns
-;; with the nth fibonacci number in rax.
-
-;; You may assume the result doesn't overflow.
-
-;; The computation does not need to be efficient.
+;; Define an assembly function named fib that computes the nth Fibonacci number
 
 (define fib
-  ;; TODO
   (seq
    (Label 'fib)
+   (Cmp 'rax 0)                  ; Compare rax with 0
+   (Je 'fib_base0)               ; If rax == 0, jump to fib_base0
+   (Cmp 'rax 1)                  ; Compare rax with 1
+   (Je 'fib_base1)               ; If rax == 1, jump to fib_base1
+
+   (Push 'rax)                   ; Save n on the stack
+   (Push 'rbx)                   ; Save rbx on the stack
+
+   (Dec 'rax)                    ; rax = n - 1
+   (Call 'fib)                   ; fib(n-1)
+   (Mov 'rbx 'rax)               ; Store fib(n-1) in rbx
+
+   (Pop 'rbx)                    ; Restore rbx from stack
+   (Push 'rax)                   ; Save fib(n-1) result on stack
+
+   (Dec 'rax)                    ; rax = n - 2
+   (Call 'fib)                   ; fib(n-2)
+
+   (Pop 'rbx)                    ; Retrieve fib(n-1)
+   (Add 'rax 'rbx)               ; fib(n-1) + fib(n-2)
+
+   (Pop 'rbx)                    ; Restore original rbx
+   (Ret)                         ; Return
+
+   (Label 'fib_base0)            ; Base case fib(0) = 0
+   (Mov 'rax 0)
+   (Ret)
+
+   (Label 'fib_base1)            ; Base case fib(1) = 1
+   (Mov 'rax 1)
    (Ret)))
+
 
 (module+ test
   ;; Int64 -> Int64
@@ -79,4 +97,5 @@
   (check-equal? (f 4) 3)
   (check-equal? (f 5) 5)
   (check-equal? (f 17) 1597)
-  (check-equal? (f 19) 4181))
+  (check-equal? (f 19) 4181)))
+
