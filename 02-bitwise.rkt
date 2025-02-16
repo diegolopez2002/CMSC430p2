@@ -1,38 +1,26 @@
 #lang racket
 (provide (all-defined-out))
-(require a86/ast)
-(require a86/interp)  ; Ensure you're importing the correct module for interpreting assembly
+(require a86)
 (module+ test
   (require rackunit))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Some problems using bitwise operations
-
-;; Define a sequence of assembly instructions that zeroes out the least
-;; significant 4 bits of the rax register.
-
 (define zero-lower-4-rax
   (seq
-    (And 'rax #xFFFFFFFFFFFFFFF0))) ; Mask to clear the lower 4 bits
-
-;; Define a sequence of assembly instructions that checks if the least
-;; significant 4 bits of rax are equal to 5, and if so, sets rcx to 1,
-;; otherwise sets rcx to 0.
+    (And 'rax #xFFFFFFFFFFFFFFF0)))
 
 (define check-lower-4-rax
   (seq
-    (Push 'rax)                     ; Save rax on the stack
-    (And 'rax #xF)                  ; Mask rax to get only the lower 4 bits
-    (Mov 'rcx 0)                    ; Default rcx to 0
-    (Cmp 'rax 5)                    ; Compare lower 4 bits with 5
-    (Mov 'rax 1)                    ; Set rax to 1
-    (Cmove 'rcx 'rax)               ; If equal, move rax to rcx (set rcx to 1)
-    (Pop 'rax)))                    ; Restore rax
+    (Push 'rax)
+    (And 'rax #xF)
+    (Mov 'rcx 0)
+    (Cmp 'rax 5)
+    (Mov 'rax 1)
+    (Cmove 'rcx 'rax)
+    (Pop 'rax)))
 
 (module+ test
-  ;; Int64 -> Int64
   (define (t1 n)
-    (a86/interp
+    (asm-interp  ; Use asm-interp provided by a86
      (prog (Global 'entry)
            (Label 'entry)
            (Mov 'rax n)
@@ -49,7 +37,7 @@
 
   (define (t2 n)
     (zero?
-     (a86/interp
+     (asm-interp
       (prog (Global 'entry)
             (Label 'entry)
             (Mov 'rax n)
@@ -57,12 +45,12 @@
             (Cmp 'rax n)
             (Mov 'rax 0)
             (Mov 'rdx 1)
-            (Cmovne 'rax 'rdx)           ; Conditional move if not equal
+            (Cmovne 'rax 'rdx)
             (Cmp 'rcx (if (= 5 (bitwise-and n #b1111)) 1 0))
-            (Cmovne 'rax 'rdx)           ; Conditional move if not equal
+            (Cmovne 'rax 'rdx)
             (Ret)))))
 
   (check-true (t2 0))
   (check-true (t2 5))
   (check-true (t2 15))
-  (check-true (t2 16))
+  (check-true (t2 16)))
