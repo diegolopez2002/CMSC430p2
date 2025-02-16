@@ -57,13 +57,14 @@
             (Cmp 'rax n)
             (Mov 'rax 0)
             (Mov 'rdx 1)
-            (Cmovne 'rax 'rdx)
+            (Cmovne 'rax 'rdx)           ; Conditional move if not equal
             (Cmp 'rcx (if (= 5 (bitwise-and n #b1111)) 1 0))
-            (Cmovne 'rax 'rdx)
+            (Cmovne 'rax 'rdx)           ; Conditional move if not equal
             (Ret)))))
 
   (check-true (t2 0))
   (check-true (t2 5))
   (check-true (t2 15))
   (check-true (t2 16)))
+
 
