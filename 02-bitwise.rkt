@@ -7,7 +7,7 @@
 
 (define zero-lower-4-rax
   (seq
-    (and rax #xFFFFFFFFFFFFFFF0)))
+    (Instr 'and 'rax #xFFFFFFFFFFFFFFF0)))
 
 (define check-lower-4-rax
   (seq
