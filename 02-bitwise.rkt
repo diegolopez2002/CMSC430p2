@@ -13,7 +13,7 @@
 
 (define zero-lower-4-rax
   (seq
-    (Instr 'and 'rax #xFFFFFFFFFFFFFFF0))) ; Mask to clear the lower 4 bits
+    (And 'rax #xFFFFFFFFFFFFFFF0))) ; Mask to clear the lower 4 bits
 
 ;; Define a sequence of assembly instructions that checks if the least
 ;; significant 4 bits of rax are equal to 5, and if so, sets rcx to 1,
