@@ -18,7 +18,7 @@
   (seq
     (Push 'rax)         ; Save rax on the stack
     (Mov 'rax 'rcx)     ; Move rcx into rax
-    (Mov 'rcx (Pop))    ; Pop original rax value into rcx
+    (Pop 'rcx)          ; Pop original rax value into rcx
   ))
 
 (module+ test
