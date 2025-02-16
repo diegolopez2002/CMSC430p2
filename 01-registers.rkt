@@ -14,10 +14,12 @@
 ;; The sequence should leave the stack and all callee-saved registers
 ;; in the same state it started in.
 
-;; Asm
 (define swap-rax-rcx
-  ;; TODO
-  (seq))
+  (seq
+    (push rax)         ; Save rax on the stack
+    (mov rax rcx)      ; Move rcx into rax
+    (mov rcx (pop))    ; Pop original rax into rcx
+  ))
 
 (module+ test
   ;; Int64 Int64 -> Boolean
