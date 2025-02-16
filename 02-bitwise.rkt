@@ -65,6 +65,6 @@
   (check-true (t2 0))
   (check-true (t2 5))
   (check-true (t2 15))
-  (check-true (t2 16)))
+  (check-true (t2 16))
 
 
