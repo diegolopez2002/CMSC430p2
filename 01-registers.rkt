@@ -16,9 +16,9 @@
 
 (define swap-rax-rcx
   (seq
-    (push rax)      
-    (mov rax rcx)     
-    (mov rcx (pop))   
+    (Push 'rax)         ; Save rax on the stack
+    (Mov 'rax 'rcx)     ; Move rcx into rax
+    (Mov 'rcx (Pop))    ; Pop original rax value into rcx
   ))
 
 (module+ test
