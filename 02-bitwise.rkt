@@ -1,9 +1,9 @@
 #lang racket
 (provide (all-defined-out))
 (require a86/ast)
+(require a86/interp)  ; Ensure you're importing the correct module for interpreting assembly
 (module+ test
-  (require rackunit)
-  (require a86/interp))
+  (require rackunit))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Some problems using bitwise operations
@@ -32,7 +32,7 @@
 (module+ test
   ;; Int64 -> Int64
   (define (t1 n)
-    (asm-interp
+    (a86/interp
      (prog (Global 'entry)
            (Label 'entry)
            (Mov 'rax n)
@@ -49,7 +49,7 @@
 
   (define (t2 n)
     (zero?
-     (asm-interp
+     (a86/interp
       (prog (Global 'entry)
             (Label 'entry)
             (Mov 'rax n)
@@ -66,5 +66,3 @@
   (check-true (t2 5))
   (check-true (t2 15))
   (check-true (t2 16))
-
-
