@@ -14,9 +14,9 @@
 (define mult3
   (seq
    (Label 'mult3)
-   (Mov 'rcx 3)          ; Load 3 into rcx
-   (Imul 'rax 'rcx)      ; Multiply rax by rcx (n * 3)
-   (Ret)))               ; Return
+   (Mov 'rcx 3)         
+   (Imul 'rax 'rcx)     
+   (Ret)))               
 
 
 (module+ test
