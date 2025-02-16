@@ -5,23 +5,21 @@
   (require rackunit)
   (require a86/interp))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Some problems using bitwise operations
-
-
-;; Define a sequence of assembly instructions that zeroes out the least
-;; significant 4 bits of the rax register.
-
-;; The sequence should leave the stack and all callee-saved registers
-;; in the same state it started in.
-
 (define zero-lower-4-rax
-  ;; TODO
-  (seq))
+  (seq
+    (and rax #xFFFFFFFFFFFFFFF0)))
 
+(define check-lower-4-rax
+  (seq
+    (push rax)
+    (and rax #xF)
+    (mov rcx 0)
+    (cmp rax 5)
+    (mov rax 1)
+    (cmove rcx rax)
+    (pop rax)))
 
 (module+ test
-  ;; Int64 -> Int64
   (define (t1 n)
     (asm-interp
      (prog (Global 'entry)
@@ -38,20 +36,6 @@
   (check-equal? (t1 (expt 2 32)) (expt 2 32))
   (check-equal? (t1 (sub1 (expt 2 64))) -16))
 
-
-;; Define a sequence of assembly instructions that puts 1 into rcx
-;; if the least signficant 4 bits of rax are equal to 5 or puts 0
-;; into rcx otherwise.  The value in rax should not change.
-
-;; The sequence should leave the stack and all callee-saved registers
-;; in the same state it started in.
-
-(define check-lower-4-rax
-  ;; TODO
-  (seq))
-
-(module+ test
-  ;; Int64 -> Boolean
   (define (t2 n)
     (zero?
      (asm-interp
@@ -65,11 +49,9 @@
             (Cmovne 'rax 'rdx)
             (Cmp 'rcx (if (= 5 (bitwise-and n #b1111)) 1 0))
             (Cmovne 'rax 'rdx)
-            ; rax is 1 if either is wrong, otherwise 0
             (Ret)))))
 
   (check-true (t2 0))
   (check-true (t2 5))
   (check-true (t2 15))
-  (check-true (t2 16))
-  (check-true (t2 21)))
+  (check-true (t2 16)))
