@@ -68,25 +68,19 @@
     ;; Save callee-saved registers
     (Push 'rbx)
     (Push 'rbp)
-
-    ;; Pop top four elements into registers
-    (Pop 'rax)        ;; First element
-    (Pop 'rbx)        ;; Second element
-    (Add 'rax 'rbx)   ;; Add second to first
-    (Pop 'rbp)        ;; Third element
-    (Add 'rax 'rbp)   ;; Add third to sum
-    (Pop 'rbx)        ;; Fourth element
-    (Add 'rax 'rbx)   ;; Add fourth to sum
-
-    ;; Restore stack by pushing elements back
-    (Push 'rbx)       ;; Fourth element
-    (Push 'rbp)       ;; Third element
-    (Push 'rbx)       ;; Second element
-    (Push 'rax)       ;; First element
-
-    ;; Restore callee-saved registers
+    (Pop 'rax)       
+    (Pop 'rbx)        
+    (Add 'rax 'rbx)   
+    (Pop 'rbp)        
+    (Add 'rax 'rbp)   
+    (Pop 'rbx)      
+    (Add 'rax 'rbx)  
     (Pop 'rbp)
     (Pop 'rbx)
+    (Push 'rbx)       
+    (Push 'rbp)      
+    (Push 'rbx)       
+    (Push 'rax)      
   ))
 
 (module+ test
