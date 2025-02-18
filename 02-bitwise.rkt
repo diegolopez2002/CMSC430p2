@@ -1,72 +1,87 @@
 #lang racket
-
 (provide (all-defined-out))
-(require rackunit)
+(require a86/ast)
+(module+ test
+  (require rackunit)
+  (require a86/interp))
 
-;; Simulate the registers as a hash table
-(define registers (make-hash))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Some problems using bitwise operations
 
-;; Helper functions for operations
-(define (mov reg value)
-  (hash-set! registers reg value))
 
-(define (and reg value)
-  (hash-set! registers reg (bitwise-and (hash-ref registers reg) value)))
+;; Define a sequence of assembly instructions that zeroes out the least
+;; significant 4 bits of the rax register.
 
-(define (cmp reg value)
-  (hash-set! registers 'cmp-result (if (= (hash-ref registers reg) value) 1 0)))
+;; The sequence should leave the stack and all callee-saved registers
+;; in the same state it started in.
 
-(define (cmove reg1 reg2)
-  (when (= (hash-ref registers 'cmp-result) 1)
-    (hash-set! registers reg1 (hash-ref registers reg2))))
-
-(define (push reg) (displayln (string-append "Pushed " (symbol->string reg))))
-(define (pop reg) (displayln (string-append "Popped " (symbol->string reg))))
-
-;; seq to execute a series of operations
-(define-syntax seq
-  (syntax-rules ()
-    ((_ . forms) (begin . forms))))
-
-;; Test for zero-lowering 4 bits of rax
 (define zero-lower-4-rax
-  (seq
-    (and 'rax #xFFFFFFFFFFFFFFF0)))
+  ;; TODO
+  (seq))
 
-;; Test for checking and manipulating the lower 4 bits of rax
-(define check-lower-4-rax
-  (seq
-    (push 'rax)
-    (and 'rax #xF)
-    (mov 'rcx 0)
-    (cmp 'rax 5)
-    (mov 'rax 1)
-    (cmove 'rcx 'rax)
-    (pop 'rax)))
 
 (module+ test
+  ;; Int64 -> Int64
   (define (t1 n)
-    (begin
-      (mov 'rax n)
-      zero-lower-4-rax
-      (hash-ref registers 'rax)))
+    (asm-interp
+     (prog (Global 'entry)
+           (Label 'entry)
+           (Mov 'rax n)
+           zero-lower-4-rax
+           (Ret))))
 
   (check-equal? (t1 0) 0)
   (check-equal? (t1 5) 0)
   (check-equal? (t1 15) 0)
   (check-equal? (t1 16) 16)
+  (check-equal? (t1 (sub1 (expt 2 32))) (- (sub1 (expt 2 32)) 15))
+  (check-equal? (t1 (expt 2 32)) (expt 2 32))
+  (check-equal? (t1 (sub1 (expt 2 64))) -16))
 
+
+;; Define a sequence of assembly instructions that puts 1 into rcx
+;; if the least signficant 4 bits of rax are equal to 5 or puts 0
+;; into rcx otherwise.  The value in rax should not change.
+
+;; The sequence should leave the stack and all callee-saved registers
+;; in the same state it started in.
+
+(define check-lower-4-rax
+  (seq (Push 'rax)
+        (And 'rax #b1111)
+        (Mov 'rcx 'rax)
+        (Pop 'rax)
+        (Cmp 'rcx 5)
+        (Je 'equal)
+        (Label 'not_equal)
+        (Mov 'rcx 0)
+        (Jmp 'done)
+        (Label 'equal)
+        (Mov 'rcx 1)
+        (Label 'done)))
+        
+
+(module+ test
+  ;; Int64 -> Boolean
   (define (t2 n)
-    (let ((result (begin
-                   (mov 'rax n)
-                   check-lower-4-rax
-                   (cmp 'rcx (if (= 5 (bitwise-and n #xF)) 1 0))
-                   (mov 'rax 0)
-                   (mov 'rdx 1)
-                   (cmove 'rax 'rdx))))
-      (= (hash-ref registers 'rax) 1)))
+    (zero?
+     (asm-interp
+      (prog (Global 'entry)
+            (Label 'entry)
+            (Mov 'rax n)
+            check-lower-4-rax
+            (Cmp 'rax n)
+            (Mov 'rax 0)
+            (Mov 'rdx 1)
+            (Cmovne 'rax 'rdx)
+            (Cmp 'rcx (if (= 5 (bitwise-and n #b1111)) 1 0))
+            (Cmovne 'rax 'rdx)
+            ; rax is 1 if either is wrong, otherwise 0
+            (Ret)))))
 
   (check-true (t2 0))
   (check-true (t2 5))
   (check-true (t2 15))
-  (check-true (t2 16)))
+  (check-true (t2 16))
+  (check-true (t2 21)))
+
