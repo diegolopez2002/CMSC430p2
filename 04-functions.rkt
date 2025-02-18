@@ -95,4 +95,3 @@
   (check-equal? (f 5) 5)
   (check-equal? (f 17) 1597)
   (check-equal? (f 19) 4181))
-
