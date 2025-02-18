@@ -16,8 +16,9 @@
 ;; in the same state it started in.
 
 (define zero-lower-4-rax
-  ;; TODO
-  (seq))
+  (seq
+    (And 'rax #xFFFFFFF0)  ;;
+))
 
 
 (module+ test
