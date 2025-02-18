@@ -73,9 +73,8 @@
    (Label 'fib_loop)
    (Sub 'rdx 1)          ;; Decrement counter
    (Jz 'fib_done)        ;; If counter is 0, we're done
-   (Add 'rbx 'rcx)       ;; rbx = F(n-2) + F(n-1)
-   (Mov 'rcx 'rbx)       ;; rcx = F(n-2)
-   (Mov 'rbx 'rdx)       ;; Move current n to rbx for next iteration
+   (Add 'rcx 'rbx)       ;; rcx = F(n-2) + F(n-1)
+   (Mov 'rbx 'rcx)       ;; rbx = F(n-1)
    (Jmp 'fib_loop)       ;; Continue the loop
 
    (Label 'fib_zero)     ;; Base case: F(0) = 0
@@ -87,9 +86,8 @@
    (Ret)
 
    (Label 'fib_done)     ;; End of loop
-   (Mov 'rax 'rbx)       ;; Move result to rax
+   (Mov 'rax 'rcx)       ;; Move result to rax (rcx contains the Fibonacci value)
    (Ret)))
-
 (module+ test
   ;; Int64 -> Int64
   (define (f n)
