@@ -14,11 +14,9 @@
 (define mult3
   (seq
    (Label 'mult3)
-   (Mov 'rcx 3)         
-   (Imul 'rax 'rcx)     
-   (Ret)))               
-
-
+   (Mov 'rcx 3)     ;; Load 3 into rcx
+   (Mul 'rcx)        ;; Multiply rax by rcx (rax = rax * rcx)
+   (Ret)))           ;; Return the result in rax
 (module+ test
   ;; Int64 -> Int64
   (define (m3 n)
@@ -54,21 +52,21 @@
    (Push 'rax)                   ; Save n on the stack
    (Push 'rbx)                   ; Save rbx on the stack
 
-   (Dec 'rax)                    ; rax = n - 1
+   (Sub 'rax 1)                  ; rax = n - 1
    (Call 'fib)                   ; fib(n-1)
    (Mov 'rbx 'rax)               ; Store fib(n-1) in rbx
 
-   (Pop 'rbx)                    ; Restore rbx from stack
-   (Push 'rax)                   ; Save fib(n-1) result on stack
+   (Pop 'rax)                    ; Restore original n to rax
+   (Push 'rax)                   ; Save n again for the next calculation
 
-   (Dec 'rax)                    ; rax = n - 2
+   (Sub 'rax 1)                  ; rax = n - 2
    (Call 'fib)                   ; fib(n-2)
 
-   (Pop 'rbx)                    ; Retrieve fib(n-1)
+   (Pop 'rax)                    ; Retrieve fib(n-1) result from stack
    (Add 'rax 'rbx)               ; fib(n-1) + fib(n-2)
 
    (Pop 'rbx)                    ; Restore original rbx
-   (Ret)                         ; Return
+   (Ret)                         ; Return result in rax
 
    (Label 'fib_base0)            ; Base case fib(0) = 0
    (Mov 'rax 0)
@@ -77,7 +75,6 @@
    (Label 'fib_base1)            ; Base case fib(1) = 1
    (Mov 'rax 1)
    (Ret)))
-
 
 (module+ test
   ;; Int64 -> Int64
@@ -97,5 +94,5 @@
   (check-equal? (f 4) 3)
   (check-equal? (f 5) 5)
   (check-equal? (f 17) 1597)
-  (check-equal? (f 19) 4181)))
+  (check-equal? (f 19) 4181))
 
