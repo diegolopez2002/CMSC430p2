@@ -13,12 +13,11 @@
 
 ;; The sequence should leave the stack and all callee-saved registers
 ;; in the same state it started in.
-
 (define swap-rax-rcx
   (seq
-    (Push 'rax)         ; Save rax on the stack
-    (Mov 'rax 'rcx)     ; Move rcx into rax
-    (Pop 'rcx)          ; Pop original rax value into rcx
+    (Mov 'rdx 'rax)  ;; Move rax into rdx (temporary storage)
+    (Mov 'rax 'rcx)  ;; Move rcx into rax
+    (Mov 'rcx 'rdx)  ;; Move rdx (old rax) into rcx
   ))
 
 (module+ test
