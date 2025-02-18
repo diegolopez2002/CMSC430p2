@@ -1,32 +1,34 @@
 #lang racket
-
 (provide (all-defined-out))
-(require rackunit)
 (require a86/ast)
 (module+ test
   (require rackunit)
   (require a86/interp))
 
-;; Define Instr as a structure with operation (op), argument1 (arg1), and argument2 (arg2)
-(define-struct instr (op arg1 arg2))
-
-;; Define a helper function to create an Instr
-(define (create-instr op arg1 arg2)
-  (make-instr op arg1 arg2))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Some problems using the stack
+
+
 ;; Define a sequence of assembly instructions that pops the first four
 ;; elements of the stack and leaves their sum in rax.
 
+;; You may assume the stack has at least four elements and that the
+;; sum doesn't overflow.
+
+;; The sequence should leave the stack with four fewer elements than
+;; it started with and all callee-saved registers in the same state it
+;; started in.
+
 (define pop-sum-4
-  (list
-    (create-instr 'mov 'rcx 'rax)       ;; Copy the count from rax to rcx
-    (create-instr 'xor 'rax 'rax)       ;; Zero out rax to accumulate the sum
-    (create-instr 'Label 'loop-start #f) ;; Label for the loop start
-    (create-instr 'pop 'rdx 'noarg)      ;; Pop one element into rdx (using 'noarg' or similar)
-    (create-instr 'add 'rax 'rdx)        ;; Add the value in rdx to rax
-    (create-instr 'sub 'rcx 1)           ;; Decrement the counter in rcx
-    (create-instr 'jnz 'loop-start 'noarg))) ;; Jump to loop-start if rcx != 0
+  (seq
+    (Pop 'rax)  
+    (Pop 'rcx) 
+    (Add 'rax 'rcx) 
+    (Pop 'rdx) 
+    (Add 'rax 'rdx)  
+    (Pop 'rcx)  
+    (Add 'rax 'rcx)
+  ))
 
 (module+ test
   ;; Int64 Int64 Int64 Int64 -> Int64
@@ -55,20 +57,37 @@
 ;; elements of the stack, leaving their sum in rax, but also leaving the
 ;; stack as it was.
 
-(define stack-sum-4
-  (list
-    (create-instr 'pop 'rax 'noarg)          ;; Pop the first element into rax
-    (create-instr 'pop 'rcx 'noarg)          ;; Pop the second element into rcx
-    (create-instr 'add 'rax 'rcx)            ;; Add rcx to rax
-    (create-instr 'pop 'rcx 'noarg)          ;; Pop the third element into rcx
-    (create-instr 'add 'rax 'rcx)            ;; Add rcx to rax
-    (create-instr 'pop 'rcx 'noarg)          ;; Pop the fourth element into rcx
-    (create-instr 'add 'rax 'rcx)            ;; Add rcx to rax
-    (create-instr 'push 'rcx 'noarg)         ;; Push fourth element back
-    (create-instr 'push 'rcx 'noarg)         ;; Push third element back
-    (create-instr 'push 'rcx 'noarg)         ;; Push second element back
-    (create-instr 'push 'rcx 'noarg)))       ;; Push first element back
+;; You may assume the stack has at least four elements and that the
+;; sum doesn't overflow.
 
+;; The sequence should leave the stack and all callee-saved registers
+;; in the same state it started in.
+
+(define stack-sum-4
+  (seq
+    ;; Save callee-saved registers
+    (Push 'rbx)
+    (Push 'rbp)
+
+    ;; Pop top four elements into registers
+    (Pop 'rax)        ;; First element
+    (Pop 'rbx)        ;; Second element
+    (Add 'rax 'rbx)   ;; Add second to first
+    (Pop 'rbp)        ;; Third element
+    (Add 'rax 'rbp)   ;; Add third to sum
+    (Pop 'rbx)        ;; Fourth element
+    (Add 'rax 'rbx)   ;; Add fourth to sum
+
+    ;; Restore stack by pushing elements back
+    (Push 'rbx)       ;; Fourth element
+    (Push 'rbp)       ;; Third element
+    (Push 'rbx)       ;; Second element
+    (Push 'rax)       ;; First element
+
+    ;; Restore callee-saved registers
+    (Pop 'rbp)
+    (Pop 'rbx)
+  ))
 
 (module+ test
   ;; Int64 Int64 Int64 Int64 -> Boolean
@@ -114,15 +133,39 @@
 ;; number in rax and pops that many elements of the stack and leaves
 ;; their sum in rax.
 
-(define sum-stack-elements
-  (list
-    (create-instr 'mov 'rcx 'rax)       ;; Copy the count from rax to rcx
-    (create-instr 'xor 'rax 'rax)       ;; Zero out rax to accumulate the sum
-    (create-instr 'Label 'loop-start 'noarg) ;; Label for the loop start
-    (create-instr 'pop 'rdx 'noarg)      ;; Pop one element into rdx
-    (create-instr 'add 'rax 'rdx)        ;; Add the value in rdx to rax
-    (create-instr 'sub 'rcx 1)           ;; Decrement the counter in rcx
-    (create-instr 'jnz 'loop-start 'noarg))) ;; Jump to loop-start if rcx != 0
+;; You may assume the stack has at least rax elements and that the
+;; sum doesn't overflow.
+
+;; The sequence should leave the stack with rax fewer elements than it
+;; started with and all callee-saved registers in the same state it
+;; started in.
+
+(define pop-sum-rax
+  (seq
+    ;; Save callee-saved registers
+    (Push 'rbx)
+    (Push 'rbp)
+
+    ;; Move the number of elements to pop into rcx
+    (Mov 'rcx 'rax)    ;; rcx = rax (number of elements)
+    (Xor 'rax 'rax)    ;; Clear rax (we will sum the values here)
+
+    ;; Start loop
+    (Label 'loop)
+    (Cmp 'rcx 0)       ;; Check if rcx is 0
+    (Je 'done)         ;; If rcx == 0, jump to done
+    (Pop 'rdx)         ;; Pop a value into rdx
+    (Add 'rax 'rdx)    ;; Add rdx to rax
+    (Sub 'rcx 1)       ;; Decrement rcx
+    (Jmp 'loop)        ;; Jump to loop label
+
+    ;; End loop
+    (Label 'done)
+
+    ;; Restore callee-saved registers
+    (Pop 'rbp)
+    (Pop 'rbx)
+  ))
 
 (module+ test
   ;; [Listof Int64] -> Int64
@@ -140,7 +183,7 @@
            (Label 'entry)
            (push-ns ns)
            (Mov 'rax (length ns))
-           sum-stack-elements ;; Changed from pop-sum-rax to sum-stack-elements
+           pop-sum-rax
            (Ret))))
 
   (check-equal? (t3 '()) 0)
@@ -149,4 +192,4 @@
   (check-equal? (t3 '(1 2 3 4)) 10)
   (check-equal? (t3 '(4 3 2 1)) 10)
   (check-equal? (t3 '(-1 2 3 4)) 8)
-  (check-equal? (t3 (build-list 36 add1)) 666))  ;; Test with a larger list
+  (check-equal? (t3 (build-list 36 add1)) 666))
