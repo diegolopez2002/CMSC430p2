@@ -9,14 +9,22 @@
 ;; Some functions in assembly
 
 
-;; Define an assembly function named mult3 that multiplies n by 3
+;; Define a an assembly function named mult3, i.e. a sequence that
+;; starts with the label mult3 and and ends with a return that leaves
+;; the stack and all callee-saved registers in the same state it
+;; started in, that is given a number n in rax and returns
+;; with with n*3 in rax.
+
+;; You may assume the result doesn't overflow.
 
 (define mult3
   (seq
    (Label 'mult3)
-   (Mov 'rcx 3)     ;; Load 3 into rcx
-   (Mul 'rcx)        ;; Multiply rax by rcx (rax = rax * rcx)
-   (Ret)))           ;; Return the result in rax
+   (Mov 'rbx 'rax)    ;; Copy the value of rax to rbx
+   (Add 'rax 'rbx)    ;; rax = rax + rbx (this gives 2n)
+   (Add 'rax 'rbx)    ;; rax = rax + rbx (this gives 3n)
+   (Ret))) 
+
 (module+ test
   ;; Int64 -> Int64
   (define (m3 n)
@@ -39,41 +47,47 @@
   (check-equal? (m3 19) (* 19 3)))
 
 
-;; Define an assembly function named fib that computes the nth Fibonacci number
+;; Define a an assembly function named fib, i.e. a sequence that
+;; starts with the label fib and and ends with a return that leaves
+;; the stack and all callee-saved registers in the same state it
+;; started in, that is given a natural number n in rax and returns
+;; with the nth fibonacci number in rax.
+
+;; You may assume the result doesn't overflow.
+
+;; The computation does not need to be efficient.
 
 (define fib
   (seq
    (Label 'fib)
-   (Cmp 'rax 0)                  ; Compare rax with 0
-   (Je 'fib_base0)               ; If rax == 0, jump to fib_base0
-   (Cmp 'rax 1)                  ; Compare rax with 1
-   (Je 'fib_base1)               ; If rax == 1, jump to fib_base1
+   (Cmp 'rax 0)          ;; Compare n with 0
+   (Je 'fib_zero)        ;; If n == 0, jump to fib_zero
+   (Cmp 'rax 1)          ;; Compare n with 1
+   (Je 'fib_one)         ;; If n == 1, jump to fib_one
 
-   (Push 'rax)                   ; Save n on the stack
-   (Push 'rbx)                   ; Save rbx on the stack
+   ;; For n >= 2, calculate Fibonacci using two registers
+   (Mov 'rbx 0)          ;; Initialize F(0)
+   (Mov 'rcx 1)          ;; Initialize F(1)
+   (Mov 'rdx 'rax)       ;; Move n to rdx (counter)
 
-   (Sub 'rax 1)                  ; rax = n - 1
-   (Call 'fib)                   ; fib(n-1)
-   (Mov 'rbx 'rax)               ; Store fib(n-1) in rbx
+   (Label 'fib_loop)
+   (Sub 'rdx 1)          ;; Decrement counter
+   (Jz 'fib_done)        ;; If counter is 0, we're done
+   (Add 'rbx 'rcx)       ;; rbx = F(n-2) + F(n-1)
+   (Mov 'rcx 'rbx)       ;; rcx = F(n-2)
+   (Mov 'rbx 'rdx)       ;; Move current n to rbx for next iteration
+   (Jmp 'fib_loop)       ;; Continue the loop
 
-   (Pop 'rax)                    ; Restore original n to rax
-   (Push 'rax)                   ; Save n again for the next calculation
-
-   (Sub 'rax 1)                  ; rax = n - 2
-   (Call 'fib)                   ; fib(n-2)
-
-   (Pop 'rax)                    ; Retrieve fib(n-1) result from stack
-   (Add 'rax 'rbx)               ; fib(n-1) + fib(n-2)
-
-   (Pop 'rbx)                    ; Restore original rbx
-   (Ret)                         ; Return result in rax
-
-   (Label 'fib_base0)            ; Base case fib(0) = 0
-   (Mov 'rax 0)
+   (Label 'fib_zero)     ;; Base case: F(0) = 0
+   (Xor 'rax 'rax)       ;; Clear rax (set to 0)
    (Ret)
 
-   (Label 'fib_base1)            ; Base case fib(1) = 1
-   (Mov 'rax 1)
+   (Label 'fib_one)      ;; Base case: F(1) = 1
+   (Mov 'rax 1)          ;; Set rax to 1
+   (Ret)
+
+   (Label 'fib_done)     ;; End of loop
+   (Mov 'rax 'rbx)       ;; Move result to rax
    (Ret)))
 
 (module+ test
