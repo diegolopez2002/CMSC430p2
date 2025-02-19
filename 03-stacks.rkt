@@ -139,14 +139,15 @@
     (Push 'rbx)
     (Push 'rbp)
     (Push 'rcx)     
-    (Mov 'rcx 'rax)  
-    (Xor 'rax 'rax)  
+    (Mov 'rcx 'rax)  ;; Store the count in rcx
+    (Xor 'rax 'rax)  ;; Zero out rax (sum accumulator)
     (Label 'loop)
-    (Jecxz 'done)    
-    (Pop 'rdx)        
-    (Add 'rax 'rdx)   
-    (Dec 'rcx)       
-    (Jmp 'loop)       
+    (Cmp 'rcx 0)     ;; Check if rcx is 0
+    (Je 'done)       ;; If rcx == 0, exit loop
+    (Pop 'rdx)       ;; Pop stack value into rdx
+    (Add 'rax 'rdx)  ;; Add it to sum in rax
+    (Sub 'rcx 1)     ;; Decrement counter (instead of Dec)
+    (Jmp 'loop)      ;; Repeat loop
     (Label 'done)
     (Pop 'rcx)       
     (Pop 'rbp)
