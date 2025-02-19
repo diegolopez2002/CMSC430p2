@@ -63,11 +63,6 @@
 ;; The sequence should leave the stack and all callee-saved registers
 ;; in the same state it started in.
 
-You are absolutely right! My apologies. I got carried away with standard x86-64 assembly syntax and forgot that you're using a specific assembly language dialect (likely Racket's assembly language, judging by the .rkt extension).  In that dialect, pushq and popq are likely not the correct instructions.
-
-Here's the corrected version using Push and Pop as you specified, and still incorporating the crucial stack pointer restoration:
-
-Code snippet
 
 (define stack-sum-4
   (seq
