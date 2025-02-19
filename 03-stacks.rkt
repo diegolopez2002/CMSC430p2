@@ -65,30 +65,21 @@
 
 (define stack-sum-4
   (seq
-    ;; Save callee-saved registers
-    (Push 'rbx)
-    (Push 'rbp)
-
-    ;; Pop four elements into registers
-    (Pop 'rax)        ;; First element
-    (Pop 'rbx)        ;; Second element
-    (Add 'rax 'rbx)   ;; Add second element to first
-    (Pop 'rbp)        ;; Third element
-    (Add 'rax 'rbp)   ;; Add third element to sum
-    (Pop 'rbx)        ;; Fourth element
-    (Add 'rax 'rbx)   ;; Add fourth element to sum
-
-    ;; Restore callee-saved registers
-    (Pop 'rbp)
-    (Pop 'rbx)
-
-    ;; Push the original values back in the same order as they were popped
-    (Push 'rbx)       ;; Fourth element
-    (Push 'rbp)       ;; Third element
-    (Push 'rbx)       ;; Second element
-    (Push 'rax)       ;; First element
+    ;; Save callee-saved registers (rbx and rbp are commonly callee-saved)
+    (pushq 'rbx)
+    (pushq 'rbp)
+    (movq 'rsp 'rcx)  ; Use rcx as a temporary storage
+    (popq 'rax)      ; First element
+    (popq 'rbx)      ; Second element
+    (addq 'rax 'rbx)  ; Add second element to first
+    (popq 'rbp)      ; Third element
+    (addq 'rax 'rbp)  ; Add third element to sum
+    (popq 'rbx)      ; Fourth element
+    (addq 'rax 'rbx)  ; Add fourth element to sum
+    (movq 'rcx 'rsp)
+    (popq 'rbp)
+    (popq 'rbx)
   ))
-
 
 (module+ test
   ;; Int64 Int64 Int64 Int64 -> Boolean
