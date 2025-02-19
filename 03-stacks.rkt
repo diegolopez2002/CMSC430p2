@@ -67,15 +67,20 @@
   (seq
     (Push 'rbx)    
     (Push 'rbp)    
-    (Push 'rsi)    
 
-    (Mov 'rsi 'rsp)  
-    (Mov 'rax (Mem 'rsi))  
-    (Add 'rax (MemOffset 'rsi 8))  
-    (Add 'rax (MemOffset 'rsi 16))  
-    (Add 'rax (MemOffset 'rsi 24))  
+    (Pop 'rax)    
+    (Pop 'rbx)    
+    (Add 'rax 'rbx)    
+    (Pop 'rbp)    
+    (Add 'rax 'rbp)    
+    (Pop 'rbx)    
+    (Add 'rax 'rbx)    
 
-    (Pop 'rsi)    
+    (Push 'rbx)    
+    (Push 'rbp)    
+    (Push 'rbx)    
+    (Push 'rax)    
+
     (Pop 'rbp)    
     (Pop 'rbx)    
   ))
