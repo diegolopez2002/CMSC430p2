@@ -63,24 +63,21 @@
 ;; The sequence should leave the stack and all callee-saved registers
 ;; in the same state it started in.
 
-
 (define stack-sum-4
   (seq
-    (Push 'rbx)
-    (Push 'rbp)
-    (Pop 'rax)  
-    (Pop 'rbx)  
-    (Add 'rax 'rbx)   
-    (Pop 'rbp)       
-    (Add 'rax 'rbp)  
-    (Pop 'rbx)       
-    (Add 'rax 'rbx)   
-    (Pop 'rbp)
-    (Pop 'rbx)
-    (Push 'rax)      
-    (Push 'rbx)      
-    (Push 'rbp)       
-    (Push 'rbx)       
+    (Push 'rbx)    
+    (Push 'rbp)    
+    (Push 'rsi)    
+
+    (Mov 'rsi 'rsp)  
+    (Mov 'rax '[rsi])  
+    (Add 'rax '[rsi + 8])  
+    (Add 'rax '[rsi + 16])  
+    (Add 'rax '[rsi + 24])  
+
+    (Pop 'rsi)    
+    (Pop 'rbp)    
+    (Pop 'rbx)    
   ))
 
 (module+ test
