@@ -138,22 +138,25 @@
 
 (define pop-sum-rax
   (seq
-    (Push 'rbx)
-    (Push 'rbp)
-    (Push 'rcx)     
-    (Mov 'rcx 'rax)  ;; Store the count in rcx
-    (Xor 'rax 'rax)  ;; Zero out rax (sum accumulator)
-    (Label 'loop)
-    (Cmp 'rcx 0)     ;; Check if rcx is 0
-    (Je 'done)       ;; If rcx == 0, exit loop
-    (Pop 'rdx)       ;; Pop stack value into rdx
-    (Add 'rax 'rdx)  ;; Add it to sum in rax
-    (Sub 'rcx 1)     ;; Decrement counter (instead of Dec)
-    (Jmp 'loop)      ;; Repeat loop
-    (Label 'done)
-    (Pop 'rcx)       
-    (Pop 'rbp)
-    (Pop 'rbx)
+    (Push 'rbx)    
+    (Push 'rcx)    
+    (Push 'rdx)    
+
+    (Mov 'rcx 'rax)  
+    (Xor 'rax 'rax)  
+
+    (Label 'loop)  
+    (Cmp 'rcx 0)  
+    (Je 'done)    
+    (Pop 'rdx)    
+    (Add 'rax 'rdx)  
+    (Sub 'rcx 1)  
+    (Jmp 'loop)    
+
+    (Label 'done)  
+    (Pop 'rdx)    
+    (Pop 'rcx)    
+    (Pop 'rbx)    
   ))
 
 (module+ test
