@@ -21,14 +21,13 @@
 
 (define pop-sum-4
   (seq
-    (Pop 'rax)  
-    (Pop 'rcx) 
-    (Add 'rax 'rcx) 
-    (Pop 'rdx) 
-    (Add 'rax 'rdx)  
-    (Pop 'rcx)  
+    (Pop 'rax)
+    (Pop 'rbx)
+    (Add 'rax 'rbx)
+    (Pop 'rcx)
     (Add 'rax 'rcx)
-  ))
+    (Pop 'rdx)
+    (Add 'rax 'rdx))) 
 
 (module+ test
   ;; Int64 Int64 Int64 Int64 -> Int64
