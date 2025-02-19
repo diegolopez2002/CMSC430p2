@@ -61,34 +61,35 @@
 (define fib
   (seq
    (Label 'fib)
-   (Cmp 'rax 0)          ;; Compare n with 0
-   (Je 'fib_zero)        ;; If n == 0, jump to fib_zero
-   (Cmp 'rax 1)          ;; Compare n with 1
-   (Je 'fib_one)         ;; If n == 1, jump to fib_one
+   (Cmp 'rax 0)
+   (Je 'fib_zero)
+   (Cmp 'rax 1)
+   (Je 'fib_one)
 
-   ;; For n >= 2, calculate Fibonacci using two registers
-   (Mov 'rbx 0)          ;; Initialize F(0)
-   (Mov 'rcx 1)          ;; Initialize F(1)
-   (Mov 'rdx 'rax)       ;; Move n to rdx (counter)
+   (Mov 'rbx 0)
+   (Mov 'rcx 1)
+   (Mov 'rdx 'rax)
 
    (Label 'fib_loop)
-   (Sub 'rdx 1)          ;; Decrement counter
-   (Jz 'fib_done)        ;; If counter is 0, we're done
-   (Add 'rcx 'rbx)       ;; rcx = F(n-2) + F(n-1)
-   (Mov 'rbx 'rcx)       ;; rbx = F(n-1)
-   (Jmp 'fib_loop)       ;; Continue the loop
+   (Sub 'rdx 1)
+   (Jz 'fib_done)
+   (Add 'rcx 'rbx)
+   (Mov 'rbx 'rcx)
+   (Jmp 'fib_loop)
 
-   (Label 'fib_zero)     ;; Base case: F(0) = 0
-   (Xor 'rax 'rax)       ;; Clear rax (set to 0)
+   (Label 'fib_zero)
+   (Xor 'rax 'rax)
    (Ret)
 
-   (Label 'fib_one)      ;; Base case: F(1) = 1
-   (Mov 'rax 1)          ;; Set rax to 1
+   (Label 'fib_one)
+   (Mov 'rax 1)
    (Ret)
 
-   (Label 'fib_done)     ;; End of loop
-   (Mov 'rax 'rcx)       ;; Move result to rax (rcx contains the Fibonacci value)
+   (Label 'fib_done)
+   (Mov 'rax 'rcx)
    (Ret)))
+
+
 (module+ test
   ;; Int64 -> Int64
   (define (f n)
