@@ -136,27 +136,20 @@
 
 (define pop-sum-rax
   (seq
-    ;; Save callee-saved registers
     (Push 'rbx)
     (Push 'rbp)
-
-    ;; Move the number of elements to pop into rcx
-    (Mov 'rcx 'rax)    ;; rcx = rax (number of elements)
-    (Xor 'rax 'rax)    ;; Clear rax (we will sum the values here)
-
-    ;; Start loop
+    (Push 'rcx)     
+    (Mov 'rcx 'rax)   
+    (Xor 'rax 'rax)    
     (Label 'loop)
-    (Cmp 'rcx 0)       ;; Check if rcx is 0
-    (Je 'done)         ;; If rcx == 0, jump to done
-    (Pop 'rdx)         ;; Pop a value into rdx
-    (Add 'rax 'rdx)    ;; Add rdx to rax
-    (Sub 'rcx 1)       ;; Decrement rcx
-    (Jmp 'loop)        ;; Jump to loop label
-
-    ;; End loop
+    (Cmp 'rcx 0)
+    (Je 'done)
+    (Pop 'rdx)
+    (Add 'rax 'rdx)
+    (Sub 'rcx 1)
+    (Jmp 'loop)
     (Label 'done)
-
-    ;; Restore callee-saved registers
+    (Pop 'rcx)   
     (Pop 'rbp)
     (Pop 'rbx)
   ))
