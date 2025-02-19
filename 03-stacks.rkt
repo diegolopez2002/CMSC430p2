@@ -70,10 +70,10 @@
     (Push 'rsi)    
 
     (Mov 'rsi 'rsp)  
-    (Mov 'rax '[rsi])  
-    (Add 'rax '[rsi + 8])  
-    (Add 'rax '[rsi + 16])  
-    (Add 'rax '[rsi + 24])  
+    (Mov 'rax (Mem 'rsi))  
+    (Add 'rax (MemOffset 'rsi 8))  
+    (Add 'rax (MemOffset 'rsi 16))  
+    (Add 'rax (MemOffset 'rsi 24))  
 
     (Pop 'rsi)    
     (Pop 'rbp)    
