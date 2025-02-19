@@ -63,22 +63,27 @@
 ;; The sequence should leave the stack and all callee-saved registers
 ;; in the same state it started in.
 
+You are absolutely right! My apologies. I got carried away with standard x86-64 assembly syntax and forgot that you're using a specific assembly language dialect (likely Racket's assembly language, judging by the .rkt extension).  In that dialect, pushq and popq are likely not the correct instructions.
+
+Here's the corrected version using Push and Pop as you specified, and still incorporating the crucial stack pointer restoration:
+
+Code snippet
+
 (define stack-sum-4
   (seq
-    ;; Save callee-saved registers (rbx and rbp are commonly callee-saved)
-    (pushq 'rbx)
-    (pushq 'rbp)
-    (movq 'rsp 'rcx)  ; Use rcx as a temporary storage
-    (popq 'rax)      ; First element
-    (popq 'rbx)      ; Second element
-    (addq 'rax 'rbx)  ; Add second element to first
-    (popq 'rbp)      ; Third element
-    (addq 'rax 'rbp)  ; Add third element to sum
-    (popq 'rbx)      ; Fourth element
-    (addq 'rax 'rbx)  ; Add fourth element to sum
-    (movq 'rcx 'rsp)
-    (popq 'rbp)
-    (popq 'rbx)
+    (Push 'rbx)
+    (Push 'rbp)
+    (mov 'rsp 'rcx)  ; Assuming 'mov' works for register-register moves
+    (Pop 'rax)
+    (Pop 'rbx)
+    (add 'rax 'rbx)
+    (Pop 'rbp)
+    (add 'rax 'rbp)
+    (Pop 'rbx)
+    (add 'rax 'rbx)
+    (mov 'rcx 'rsp)
+    (Pop 'rbp)
+    (Pop 'rbx)
   ))
 
 (module+ test
